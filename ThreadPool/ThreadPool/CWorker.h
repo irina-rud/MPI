@@ -12,7 +12,7 @@ public:
 
 	CWorker(){
 		enabled = true;
-		thread(&CWorker::thread_fn, this);
+		std::thread(&CWorker::thread_fn, this);
 	}
 	~CWorker(){
 		enabled = false;

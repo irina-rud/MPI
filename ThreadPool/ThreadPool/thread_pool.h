@@ -3,12 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
+#include "CWorker.h"
 
-template <typename TResult> 
+
+template <typename TResult>
 class ThreadPool{
 public:
-	ThreadPool(size_t threads)
-	{
+	ThreadPool(size_t threads){
 		if (threads == 0) {
 			SYSTEM_INFO sysinfo;
 			GetSystemInfo(&sysinfo);
@@ -16,7 +17,7 @@ public:
 		}
 		for (size_t i = 0; i<threads; i++)
 		{
-			worker_ptr pWorker(new Worker);
+			std::shared_ptr<CWorker> pWorker(new CWorker);
 			_workers.push_back(pWorker);
 		}
 	}
@@ -29,21 +30,22 @@ public:
 			threads = 1;
 		for (size_t i = 0; i<threads; i++)
 		{
-			worker_ptr pWorker(new Worker);
+			std::shared_ptr<CWorker> pWorker(new CWorker);
 			_workers.push_back(pWorker);
 		}
 	}
 	~ThreadPool() {}
 	std::future<TResult> submit(std::function<TResult()> fn) {
 		std::function<TResult()> func = std::bind(_fn, _args...);
-		std::future<TResult> res;
+		std::packaged_task<TResult(void)> tsk(func);   // set up packaged_task
+		std::future<int> res;
 		std::function<void()> fn = [=]()
 		{
-			pData->data = rfn();
-			pData->ready = true;
+			res = tsk.get_future();
+			std::move(tsk);
 		};
 		getFreeWorker()->appendFn(fn);
-		return pData;
+		return res;
 	}
 
 private:
