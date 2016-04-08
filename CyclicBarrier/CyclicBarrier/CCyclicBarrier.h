@@ -20,8 +20,9 @@ public:
 			iteration.fetch_add(1);
 		}
 		else {
-			unsigned int generation = iteration.load();
+			
 			std::unique_lock<std::mutex> lock(mutex);
+			unsigned int generation = iteration.load();
 			condVar.wait(lock, [&] { return isNoWaiting; });
 			if (generation == iteration.load()) {
 				condVar.wait(lock, [&] { return isNoWaiting; });
