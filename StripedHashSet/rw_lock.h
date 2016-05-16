@@ -11,6 +11,10 @@
 
 class rw_lock {
 public:
+    rw_lock();
+
+    rw_lock(rw_lock && some);
+
     void write_lock();
     bool try_write_lock();
     void write_unlock();
@@ -21,9 +25,9 @@ public:
 
 private:
     size_t readers_num;
-    std::unique_lock<std::mutex> &mut;
+    std::mutex* mut;
     bool is_writer;
-    std::condition_variable unlocked;
+    std::condition_variable* unlocked;
 };
 
 

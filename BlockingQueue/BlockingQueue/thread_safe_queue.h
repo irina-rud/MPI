@@ -6,7 +6,7 @@
 
 
 
-template<typename T>
+template <typename T>
 class CBlockingQueue {
 private:
 	std::queue<T> internalQueue;
